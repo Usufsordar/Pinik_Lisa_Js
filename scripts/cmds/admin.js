@@ -3,12 +3,16 @@ const { writeFileSync } = require("fs-extra");
 
 module.exports = {
 	config: {
-		name: "admin",
-		version: "1.6",
+		name: "admin1",
+		version: "1.5",
 		author: "NTKhang",
 		countDown: 5,
 		role: 2,
-		description: {
+		shortDescription: {
+			vi: "Thêm, xóa, sửa quyền admin",
+			en: "Add, remove, edit admin role"
+		},
+		longDescription: {
 			vi: "Thêm, xóa, sửa quyền admin",
 			en: "Add, remove, edit admin role"
 		},
@@ -47,7 +51,7 @@ module.exports = {
 	onStart: async function ({ message, args, usersData, event, getLang }) {
 		switch (args[0]) {
 			case "add":
-			case "+": {
+			case "-a": {
 				if (args[1]) {
 					let uids = [];
 					if (Object.keys(event.mentions).length > 0)
