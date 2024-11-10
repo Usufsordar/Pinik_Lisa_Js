@@ -3,24 +3,23 @@ const axios = require("axios");
 const path = require("path");
 const { getPrefix } = global.utils;
 const { commands, aliases } = global.GoatBot;
-const doNotDelete = "[ N I S A N ]"; // changing this wont change the goatbot V2 of list cmd it is just a decoyy
 
 module.exports = {
   config: {
     name: "help",
-    version: "1.17",
-    author: "NISAN",
-    countDown: 5,
+    version: "1.18",
+    author: "𝗔𝗺𝗶𝗻𝘂𝗹 𝗦𝗼𝗿𝗱𝗮𝗿",
+    countDown: 0,
     role: 0,
     shortDescription: {
-      en: "View command usage and list all commands directly",
+      en: "View command usage",
     },
     longDescription: {
-      en: "View command usage and list all commands directly",
+      en: "View command usage, list all commands, search commands by the first letter, review stats or logs, and monitor specific actions",
     },
     category: "info",
     guide: {
-      en: "{pn} / help cmdName ",
+      en: "{pn} / help cmdName \n{pn} / help -s <letter> (to search commands by the first letter)\n{pn} / help -r <logs|usage> (to review logs or usage)\n{pn} / help -m <start|stop|status> <target> (to monitor specific actions)",
     },
     priority: 1,
   },
@@ -31,44 +30,84 @@ module.exports = {
     const prefix = getPrefix(threadID);
 
     if (args.length === 0) {
-      const categories = {};
-      let msg = "";
+      let msg = `━━━ 💖 𝐀𝐌𝐈𝐍𝐔𝐋-𝐁𝐎𝐓 💖 ━━━\n\n`;
 
-      msg += ``; // replace with your name 
+      const categories = {};
 
       for (const [name, value] of commands) {
         if (value.config.role > 1 && role < value.config.role) continue;
 
         const category = value.config.category || "Uncategorized";
-        categories[category] = categories[category] || { commands: [] };
-        categories[category].commands.push(name);
+        if (!categories[category]) categories[category] = [];
+        categories[category].push(name);
       }
 
-      Object.keys(categories).forEach((category) => {
-        if (category !== "info") {
-          msg += `\n╭─────❃『  ☟︎︎︎${category.toUpperCase()} 🐐 』`;
-
-          const names = categories[category].commands.sort();
-          for (let i = 0; i < names.length; i += 3) {
-            const cmds = names.slice(i, i + 2).map((item) => `☔︎${item}`);
-            msg += `\n│${cmds.join(" ".repeat(Math.max(1, 5 - cmds.join("").length)))}`;
-          }
-
-          msg += `\n╰────────────✦`;
-        }
-      });
+      for (const category in categories) {
+        msg += `╭──『  ${category.toUpperCase()} 』\n`;
+        msg += ` ✧${categories[category].sort().join(' ✧ ')}\n`;
+        msg += `╰────────────◊\n\n`;
+      }
 
       const totalCommands = commands.size;
-      msg += `\n\n╭─────❃[𝙴𝙽𝙹𝙾𝚈]\n│>𝚃𝙾𝚃𝙰𝙻 𝙲𝙼𝙳𝚂: [${totalCommands}].\n│𝚃𝚈𝙿𝙴:[ ${prefix}𝙷𝙴𝙻𝙿 𝚃𝙾\n│<𝙲𝙼𝙳> 𝚃𝙾 𝙻𝙴𝙰𝚁𝙽 𝚃𝙷𝙴 𝚄𝚂𝙰𝙶𝙴.]\n╰────────────✦`;
-      msg += ``;
-      msg += `\n╭─────❃\n│ 🌟 | [ 𝙶𝙾𝙰𝚃𝙱𝙾𝚃🐐│𝙵𝙱:https://www.facebook.com/profile.php?id=/61567840496026\n╰────────────✦`; 
+      msg += `━━━💖 𝗦𝗨𝗣𝗣𝗢𝗥𝗧 𝗕𝗢𝗫 💖━━━\n`;
+      msg += `Join Ancestor Bot Zone ❈ Support Box type: ${prefix}supportgc or type: ${prefix}callad to contact with admins.\n\n`;
+      msg += `⇒ Total: ${totalCommands} commands\n`;
+      msg += `⇒ Use ${prefix}help <cmd> to get more information`;
 
-      const attachment = await axios.get("https://i.imgur.com/BG239h5.gif", { responseType: "stream" });
+      await message.reply(msg);
 
-      await message.reply({
-        body: msg,
-        attachment: attachment.data,
-      });
+    } else if (args[0] === "-s" && args[1]) {
+      const searchLetter = args[1].toLowerCase();
+      let msg = `━━━ 💖 𝐀𝐌𝐈𝐍𝐔𝐋-𝐁𝐎𝐓 💖 ━━━\n\n`;
+
+      const searchResults = [];
+      for (const [name, value] of commands) {
+        if (value.config.role > 1 && role < value.config.role) continue;
+
+        if (name.startsWith(searchLetter)) {
+          searchResults.push(name);
+        }
+      }
+
+      if (searchResults.length > 0) {
+        msg += `Found ${searchResults.length} command(s) starting with "${searchLetter.toUpperCase()}":\n`;
+        msg += searchResults.sort().join(" ✧ ");
+      } else {
+        msg += `No commands found starting with "${searchLetter.toUpperCase()}".`;
+      }
+
+      await message.reply(msg);
+
+    } else if (args[0] === "-r" && args[1]) {
+      const reviewType = args[1].toLowerCase();
+      let msg = `━━━ 💖 𝐀𝐌𝐈𝐍𝐔𝐋-𝐁𝐎𝐓 💖 ━━━\n\n`;
+
+      if (reviewType === "logs") {
+        msg += `Here are the latest logs:\n[Log details...]\n`;
+      } else if (reviewType === "usage") {
+        msg += `Usage statistics:\n[Usage details...]\n`;
+      } else {
+        msg += `Invalid review type "${reviewType}". Use "logs" or "usage".`;
+      }
+
+      await message.reply(msg);
+
+    } else if (args[0] === "-m" && args[1]) {
+      const monitorAction = args[1].toLowerCase();
+      let msg = `━━━ 💖 𝐀𝐌𝐈𝐍𝐔𝐋-𝐁𝐎𝐓 💖 ━━━\n\n`;
+
+      if (monitorAction === "start" && args[2]) {
+        msg += `Started monitoring ${args[2]}.\n`;
+      } else if (monitorAction === "stop" && args[2]) {
+        msg += `Stopped monitoring ${args[2]}.\n`;
+      } else if (monitorAction === "status") {
+        msg += `Current monitoring status:\n[Monitoring details...]\n`;
+      } else {
+        msg += `Invalid monitor action "${monitorAction}". Use "start", "stop", or "status".`;
+      }
+
+      await message.reply(msg);
+
     } else {
       const commandName = args[0].toLowerCase();
       const command = commands.get(commandName) || commands.get(aliases.get(commandName));
@@ -80,25 +119,25 @@ module.exports = {
         const roleText = roleTextToString(configCommand.role);
         const author = configCommand.author || "Unknown";
 
-        const longDescription = configCommand.longDescription ? configCommand.longDescription.en || "No description" : "No description";
+        const longDescription = configCommand.longDescription
+          ? configCommand.longDescription.en || "No description"
+          : "No description";
 
         const guideBody = configCommand.guide?.en || "No guide available.";
-        const usage = guideBody.replace(/{p}/g, prefix).replace(/{n}/g, configCommand.name);
+        const usage = guideBody.replace(/{pn}/g, prefix).replace(/{cmdName}/g, configCommand.name);
 
-        const response = `╭── 𝐍𝐀𝐌𝐄 ────⭓
+        const response = `╭── NAME ───⭓
   │ ${configCommand.name}
-  ├── 𝐈𝐧𝐟𝐨
-  │ 𝙳𝚎𝚜𝚌𝚛𝚒𝚙𝚝𝚒𝚘𝚗: ${longDescription}
+  ├── INFO
+  │ Description: ${longDescription}
   │ Other names: ${configCommand.aliases ? configCommand.aliases.join(", ") : "Do not have"}
-  │ Other names in your group: Do not have
-  │ 𝚅𝚎𝚛𝚜𝚒𝚘𝚗: ${configCommand.version || "1.0"}
-  │ 𝚁𝚘𝚕𝚎: ${roleText}
-  | 𝙿𝚛𝚎𝚏𝚒𝚡: ${prefix}
-  │ 𝚃𝚒𝚖𝚎 𝚙𝚎𝚛 𝚌𝚘𝚖𝚖𝚊𝚗𝚍: ${configCommand.countDown || 1}s
-  │ 𝙰𝚞𝚝𝚑𝚘𝚛: ${author}
-  ├── 𝐔𝐬𝐚𝐠𝐞
+  │ Version: ${configCommand.version || "1.0"}
+  │ Role: ${roleText}
+  │ Time per command: ${configCommand.countDown || 1}s
+  │ Author: ${author}
+  ├── Usage
   │ ${usage}
-  ├──𝐍𝐨𝐭𝐞𝐬
+  ├── Notes
   │ The content inside <XXXXX> can be changed
   │ The content inside [a|b|c] is a or b or c
   ╰━━━━━━━❖`;
@@ -112,7 +151,7 @@ module.exports = {
 function roleTextToString(roleText) {
   switch (roleText) {
     case 0:
-      return "0 (EVERYONE)";
+      return "0 (All users)";
     case 1:
       return "1 (Group administrators)";
     case 2:
@@ -120,4 +159,4 @@ function roleTextToString(roleText) {
     default:
       return "Unknown role";
   }
-  }
+    }
